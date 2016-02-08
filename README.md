@@ -1,5 +1,7 @@
 # ey-gazette
-下載行政院公報
+下載行政院公報（民國94年以後）
+
+下載成果可瀏覽 https://kong0107.github.io/ey-gazette ，或是至 [ey-gazette-data](https://github.com/kong0107/ey-gazette-data) 下載全部 XML 檔。
 
 ## Data Source
 資料網址格式： `http://gazette.nat.gov.tw/egFront/OpenData/download.jsp?fn=<fn>`
