@@ -1,12 +1,13 @@
 #!/bin/bash
 #
-# Usage: $0 <fn>
+# Usage: ./main.sh <fn>
 # This would download `http://gazette.nat.gov.tw/egFront/OpenData/download.jsp?fn=<fn>`,
-# unzip it to `./data` if its size is big enough, and then delete the archive.
+# unzip it to $outputDir if its size is big enough, and then delete the archive.
 # @see http://gazette.nat.gov.tw/egFront/OpenData/help.jsp
 #
-# Usage: $0
-# Download all and unzip them to `./data`.
+# Usage: ./main.sh
+# Download all and unzip them to $outputDir.
+# This may take more than 10 hours.
 #
 # For bash syntax:
 # @see http://tldp.org/HOWTO/Bash-Prog-Intro-HOWTO.html
@@ -15,13 +16,14 @@
 #
 # Definitions.
 #
+outputDir=data
 minimumsize=400
-wait=10
+wait=10	# seconds to wait between downloads
 function grab {
 	curl -o $1.zip http://gazette.nat.gov.tw/egFront/OpenData/download.jsp?fn=$1
 	actualsize=`wc -c <$1.zip`
 	if [ $actualsize -ge $minimumsize ]; then
-		unzip -o $1.zip -d data
+		unzip -o $1.zip -d $2
 		rm $1.zip
 		return 0
 	else
@@ -32,7 +34,8 @@ function grab {
 }
 
 if [ -n "$1" ]; then
-	grab $1
+	split=(${1//-/ })
+	grab $1 "$outputDir/${split[0]}"
 	exit
 fi
 
@@ -44,7 +47,7 @@ nowDate=`date +%d`
 # A wrapper, for easily debug.
 #
 function wrapper {
-	grab $1
+	grab $1 $2
 	return $?
 }
 
@@ -60,7 +63,7 @@ while [ $year -le $nowYear ]; do
 		while : ; do
 			str=`printf "%03d-%02d_%d" $year $month $date`
 			echo $str
-			wrapper $str
+			wrapper $str `printf "%s/%03d" $outputDir $year`
 			if [ $? -ne 0 ]; then break; fi
 			echo wait $wait seconds...
 			sleep $wait
@@ -78,6 +81,6 @@ date=1
 while [ $date -le $nowDate ]; do
 	str=`printf "%03d-%02d-%02d" $nowYear $nowMonth $date`
 	echo $str
-	wrapper $str
+	wrapper $str "$outputDir/$nowYear"
 	let date=date+1
 done
