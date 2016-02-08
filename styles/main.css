@@ -1,0 +1,79 @@
+/**
+ * This file shall apply to a specific site.
+ */
+
+/**
+ * Global
+ */
+nav li {
+	list-style-type: none;
+	display: inline-block;
+	padding: .1em .5em;
+	border-right: 1px solid #888;
+}
+a {
+	color: inherit;
+	text-decoration: none;
+}
+a[href]:hover { text-decoration: underline; }
+a img { border: 0; }
+body {
+	font-family: '微軟正黑體', 'Calibri', arial;
+}
+
+
+/**
+ * Header
+ */
+body > header {
+	background-color: #000;
+	color: #fff;
+}
+body > header > * {
+	float: left;
+}
+#brand {
+	font-size: xx-large;
+	font-weight: bold;
+	margin: .2em .4em;
+}
+
+
+/**
+ * Content
+ */
+body > section {
+	padding: .5em;
+}
+h1 { font-size: 200%; }
+h2 { font-size: 150%; }
+h3 { font-size: 140%; }
+h4 { font-size: 130%; }
+h5 { font-size: 120%; }
+h6 { font-size: 110%; }
+dl > dt { font-weight: bold; }
+.dlTable > dl > dt,
+.dlTable > dl > dd {
+	padding: .3em;
+	min-width: 4.5em;
+}
+
+.record {
+	clear: both;
+	border-top: 1px solid #888;
+	margin: .5em 0;
+	padding: .5em 0;
+}
+.GazetteId {
+	font-size: small;
+	color: #444;
+	font-family: monospace;
+}
+
+/**
+ * Footer
+ */
+body > footer {
+	background-color: #000;
+	color: #fff;
+}

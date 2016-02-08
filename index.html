@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>行政院公報備份</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-sanitize.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular-route.min.js"></script>
+		<link rel="stylesheet" href="styles/std.css">
+		<link rel="stylesheet" href="styles/main.css">
+		<script>
+angular
+.module('app', ['ngSanitize', 'ngRoute'])
+.config(function($routeProvider) {
+	$routeProvider.when('/:date?', {
+		templateUrl: 'oneDay',
+		controller: 'oneDay'
+	});
+})
+.controller('controller', function($scope, $http) {
+	$http.get('tagTitles.json', {cache: true}).then(function(res) {
+		$scope.tagTitles = res.data;
+	}, function(res) {console.error(res);});
+})
+.controller('oneDay', function($scope, $http, $routeParams, $location) {
+	var dateObj = new Date;
+	var split = ($routeParams.date || '').split('-')
+		.map(function(num) {return parseInt(num, 10);})
+	;
+	if(split.length == 3 && !split.some(isNaN) && split[0] >= 94) {
+		dateObj.setFullYear(split[0] + 1911);
+		dateObj.setMonth(split[1] - 1);
+		dateObj.setDate(split[2]);
+	}
+	find(dateObj);
+	function find(dateObj) {
+		var year = dateObj.getFullYear() - 1911,
+			month = dateObj.getMonth() + 1,
+			date = dateObj.getDate()
+		;
+		$scope.selectYear = '' + year;
+		$scope.selectMonth = '' + month;
+		$scope.selectDate = '' + date;
+		if(year < 100) year = '0' + year;
+		if(month < 10) month = '0' + month;
+		if(date < 10) date = '0' + date;
+
+		var str = [year, month, date].join('-');
+		$http.get('../ey-gazette-data/' + year + '/' + str + '/' + str + '.xml', {cache: true}).then(
+			function(res) {
+				$location.url(str);
+				var records = (new DOMParser)
+					.parseFromString(res.data, 'text/xml')
+					.getElementsByTagName('Record')
+				;
+				$scope.data =
+					Array.prototype.map.call(records, function(rec) {
+						var result = {};
+						Array.prototype.forEach.call(rec.children, function(node) {
+							if(!node.childNodes.length) return;
+							result[node.tagName] = node.childNodes[0].data;
+						});
+						return result;
+					})
+				;
+				$scope.date = dateObj;
+			},
+			function(res) {
+				dateObj.setDate(dateObj.getDate() - 1);
+				if(dateObj.getFullYear() - 1911 >= 94) find(dateObj);
+				else console.error('Data not found');
+			}
+		);
+	};
+	$scope.options = {year: [], month: [], date: []};
+	for(var i = 94; i <= ((new Date).getFullYear() - 1911); ++i)
+		$scope.options.year.push(i);
+	for(var i = 1; i <= 12; ++i) $scope.options.month.push(i);
+	for(var i = 1; i <= 31; ++i) $scope.options.date.push(i);
+
+	$scope.goByDate = function() {
+		$location.url([$scope.selectYear, $scope.selectMonth, $scope.selectDate].join('-'));
+	};
+});
+		</script>
+	</head>
+	<body ng-app="app" ng-controller="controller">
+		<header>
+			<a id="brand" href="./">行政院公報備份</a>
+		</header>
+		<section ng-view>
+			<script type="text/ng-template" id="oneDay">
+				<h1 style="float: left;">
+					<time datetime="{{date|date:'yyyy-MM-dd'}}" ng-show="date">
+						{{date.getFullYear()-1911}}年
+						{{date|date:'M月 d日'}}
+					</time>
+				</h1>
+				<form style="float: right;">
+					<select ng-model="selectYear">
+						<option ng-repeat="y in options.year">{{y}}</option>
+					</select>
+					年
+					<select ng-model="selectMonth">
+						<option ng-repeat="m in options.month">{{m}}</option>
+					</select>
+					月
+					<select ng-model="selectDate">
+						<option ng-repeat="d in options.date">{{d}}</option>
+					</select>
+					日
+					<button ng-click="goByDate()">前往</button>
+				</form>
+				<p ng-hide="data">讀取中…</p>
+				<div style="clear: both;" ng-show="data">
+					<input ng-model="search" placeholder="搜尋此日">
+					<br>
+					{{search?'找到':'共有'}}{{filtered.length}}筆資料
+				</div>
+				<article ng-repeat="record in filtered=(data |filter :search) track by $index" class="record">
+					<header>
+						<a class="GazetteId" target="_blank" href="{{record.GazetteHTML}}">
+							{{record.PubGovName}}
+							{{record.GazetteId}}
+						</a>
+						<h2 class="clickable" ng-click="record.show=!record.show">{{record.Title}}</h2>
+					</header>
+					<div class="dlTable" ng-show="record.show">
+						<dl ng-repeat="(key, val) in record track by key" ng-if="['show', 'HTMLContent'].indexOf(key)==-1">
+							<dt>{{tagTitles[key]}}</dt>
+							<dd class="rawdata" ng-bind="val"></dd>
+						</dl>
+					</div>
+				</article>
+			</script>
+		</section>
+		<footer>
+			<nav>
+				<ul class="inlineList">
+					<li><a href="https://www.facebook.com/kong.sex">Author</a></li>
+					<li><a href="https://github.com/kong0107/ey-gazette">Program Codes</a></li>
+					<li><a href="http://gazette.nat.gov.tw/egFront/OpenData/help.jsp">Data Source</a></li>
+				</ul>
+			</nav>
+		</footer>
+	</body>
+</html>
