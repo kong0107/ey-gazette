@@ -38,10 +38,26 @@ else main();
 function main(db) {
 	fs.readdir('./data', function(err, dirs) {
 		if(err) return console.error('Error: no `data` directory to import');
-		parseByDate(dirs, 0, function() {
+		parseByYear(dirs, 0, function() {
 			if(db) db.close();
 			console.log('Finish');
 		});
+	});
+}
+
+function parseByYear(years, index, callback) {
+	if(index == years.length) return setImmediate(callback);
+	var next = function(msg, err) {
+		if(msg) console[err ? 'error' : 'log'](msg);
+		setImmediate(parseByYear, years, index + 1, callback);
+	};
+	var year = years[index];
+	var dir = './data/' + year;
+	fs.readdir(dir, function(err, dirs) {
+		if(err) return next('Warning: failed to read dir ' + dir, err);
+		if(isNaN(parseInt(year, 10)))
+			return next('Warning: skipping unknown dir ' + year, true);
+		parseByDate(dirs, 0, next);
 	});
 }
 
@@ -52,14 +68,15 @@ function parseByDate(dates, index, callback) {
 		setImmediate(parseByDate, dates, index + 1, callback);
 	};
 	var dateStr = dates[index];
+	var yearStr = dateStr.substr(0, 3);
 	var split = dateStr.split('-').map(function(num) {return parseInt(num, 10);});
 	if(split.length != 3 || split.some(isNaN))
-		return next('Warning: skipped unknown date string ' + dateStr, true);
+		return next('Warning: skipping unknown dir ' + dateStr, true);
 	split[0] += 1911;
 	var dateCEStr = (new Date(split.join('-'))).toISOString().substr(0, 10);
 
 	fs.readFile(
-		util.format('./data/%s/%s.xml', dateStr, dateStr),
+		util.format('./data/%s/%s/%s.xml', yearStr, dateStr, dateStr),
 		'utf8',
 		function(err, xml) {
 			if(err) return next('Error: error on file reading', err);
@@ -68,7 +85,7 @@ function parseByDate(dates, index, callback) {
 				try {
 					var records = res.Gazette.Record;
 					records.forEach(function(rec) {
-						delete rec.HTMLContent;
+						//delete rec.HTMLContent;
 						for(var i in rec) {
 							if(!Array.isArray(rec[i]) || rec[i].length != 1)
 								return console.error('Error: uknown format of some record');
@@ -82,7 +99,7 @@ function parseByDate(dates, index, callback) {
 				catch(err) {return next('Error: xmlDoc with wrong structure ' + dateStr, err);}
 
 				if(outputJSON) fs.writeFileSync(
-					util.format('./data/%s/%s.json', dateStr, dateStr),
+					util.format('./data/%s/%s/%s.json', yearStr, dateStr, dateStr),
 					JSON.stringify(records, null, '\t').replace(/\n\t+/g, '\n')
 				);
 				if(coll) coll.insertMany(records, function(err) {
