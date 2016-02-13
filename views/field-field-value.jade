@@ -2,6 +2,21 @@ extends layout
 
 block content
 	header: h1 #{fields[field].title}：#{fieldValue}
+	em 共 #{count} 筆
+	if count > ipp
+		.pagination
+			if page > 1
+				.prevPage: a(href='/field/'+field+'/'+fieldValue+'/'+(page-1)) 上一頁
+			.pageSelector
+				| 第
+				select
+					- var p = 0
+					while p < (count / ipp)
+						- ++p
+						option(selected=(p==page))= p
+				| 頁
+			if page < count / ipp
+				.nextPage: a(href='/field/'+field+'/'+fieldValue+'/'+(page+1)) 下一頁
 	each doc in docs
 		article.articleListItem
 			a(href=doc.GazetteHTML)

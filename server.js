@@ -32,6 +32,7 @@ app.use(function(req, res) {
  * Settings.
  */
 app.locals.siteName = app.locals.pageTitle = config.siteName;
+app.locals.ipp = config.ipp;
 async.parallel([
 	function(callback) {
 		mongodb.MongoClient.connect(config.dburl, callback);

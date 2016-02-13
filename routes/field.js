@@ -1,5 +1,6 @@
 var config = require('../config.js');
 var express = require('express');
+var async = require('async');
 
 var debug = require('debug')(__filename.substr(__dirname.length + 1));
 var router = module.exports = express.Router();
@@ -23,18 +24,23 @@ router.get('/:field/:value?/:page?',
 	},
 	function(req, res) {
 		var fieldValue = res.locals.fieldValue = req.params.value;
+		var coll = req.app.locals.db.collection('records');
 		var page = res.locals.page = parseInt(req.params.page, 10) || 1;
 		var skip = (page - 1) * config.ipp;
 		var query = {};
 		query[req.params.field] = fieldValue;
-		
+
 		debug('Page: ' + page);
 
-		req.app.locals.db.collection('records')
-		.find(query).sort({gazetteDate: -1}).skip(skip).limit(config.ipp)
-		.toArray(function(err, docs) {
-			if(err) return next(err);
-			res.render('field-field-value', {docs: docs});
+		async.parallel({
+			docs: function(callback) {
+				coll.find(query).sort({gazetteDate: -1}).skip(skip).limit(config.ipp).toArray(callback);
+			},
+			count: function(callback) {
+				coll.count(query, callback);
+			}
+		}, function(err, results) {
+			res.render('field-field-value', results);
 		});
 	}
 );

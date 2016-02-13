@@ -71,7 +71,7 @@ h4 { font-size: 140%; }
 h5 { font-size: 130%; }
 h6 { font-size: 120%; }
 ol { padding-left: 40px; }
-p { margin-top: .2em; margin-bottom: .5em; line-height: 175%; }
+p { margin-top: .2em; margin-bottom: .5em; line-height: 125%; }
 a[href] { color: inherit; text-decoration: none; }
 a[href]:hover { text-decoration: underline; }
 
@@ -101,6 +101,31 @@ a[href]:hover { text-decoration: underline; }
 	padding: .5em;
 }
 dt {white-space: pre;}
+
+.pagination:before {
+	content: '';
+	display: block;
+	clear: both;
+}
+.pagination:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+.prevPage {
+	float: left;
+}
+.pageSelector {
+	float: left;
+	margin-left: calc(50% - 4em);
+}
+.nextPage {
+	float: right;
+}
+.Explain p {
+	padding-left: 2em;
+	text-indent: -2em;
+}
 
 
 /**

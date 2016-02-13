@@ -1,10 +1,93 @@
 extends layout
 
+mixin fieldLink(field)
+	a(href='/field/' + field + '/' + doc[field])= doc[field]
+
+mixin fieldLinkList(field)
+	ul
+		each item in doc[field]
+			li: a(href='/field/' + field + '/' + item)= item
+
 block content
-	header: h1= doc.Title
+	header
+		h1= doc.Title
+		p(lang='en')= doc.TitleEnglish
 	.dlTable
-		each value, field in doc
-			if fields[field]
-				dl
-					dt= fields[field].title
-					dd.rawdata= value.join ? value.join(';') : value
+		dl
+			dt 原始資料
+			dd: ul
+				li: a(href=doc.GazetteHTML) HTML
+				li: a(href=doc.GazetteHTML.slice(0, -6)+'OEg.pdf') PDF
+		dl
+			dt 公報日期
+			dd: time= doc.gazetteDate
+		dl
+			dt 發文日期
+			dd= doc.Date_Created
+
+		if doc.GazetteId
+			dl
+				dt 發文字號
+				dd
+					ul
+						each gid in doc.GazetteId
+							li= gid
+		dl
+			dt 流水號
+			dd= doc.MetaId
+		dl
+			dt 類型
+			dd
+				+fieldLink('Doc_Style_LName')
+				| &nbsp;＞&nbsp;
+				+fieldLink('Doc_Style_SName')
+		dl
+			dt 篇別（機關瀏覽）
+			dd
+				+fieldLink('Chapter')
+				| &nbsp;＞&nbsp;
+				+fieldLink('PubGov')
+		if doc.PubGovName
+			dl
+				dt 公(發)布機關
+				dd: +fieldLinkList('PubGovName')
+		if doc.UndertakeGov
+			dl
+				dt 承辦機關
+				dd: +fieldLinkList('UndertakeGov')
+		if doc.Officer_name
+			dl
+				dt 機關首長
+				dd: ul
+					each name in doc.Officer_name
+						li= name
+		if doc.ThemeSubject
+			dl
+				dt 主旨
+				dd= doc.ThemeSubject
+		if doc.Explain
+			dl
+				dt 說明
+				dd.Explain
+					each para in doc.Explain.split("\r\n")
+						p= para
+		if doc.Keyword
+			dl
+				dt 關鍵字
+				dd: +fieldLinkList('Keyword')
+		if doc.Eng_Keyword
+			dl
+				dt(title='這個欄位真的叫做「英文關鍵字」') 英文關鍵字
+				dd: +fieldLinkList('Eng_Keyword')
+		if doc.Category
+			dl
+				dt 內容主題
+				dd: +fieldLinkList('Category')
+		if doc.Cake
+			dl
+				dt 施政分類
+				dd: +fieldLinkList('Cake')
+		if doc.Service
+			dl
+				dt 服務分類
+				dd: +fieldLinkList('Service')
