@@ -1,0 +1,23 @@
+{
+  "name": "ey-gazette",
+  "version": "0.0.1",
+  "description": "Site for Executive Yuan Gazette",
+  "keywords": [
+    "gov"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kong0107/ey-gazette.git"
+  },
+  "author": "kong0107",
+  "bugs": {
+    "url": "https://github.com/kong0107/ey-gazette/issues"
+  },
+  "homepage": "https://github.com/kong0107/ey-gazette#readme",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "express": "^4.13.4",
+    "jade": "^1.11.0",
+    "mongodb": "^2.1.7"
+  }
+}
