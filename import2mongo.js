@@ -3,6 +3,11 @@
  */
 
 /**
+ * 設定是否要儲存／輸出會佔掉約七成空間的 `HTMLContent` 欄位。
+ */
+var deleteHTMLContent = true;
+
+/**
  * MongoDB 資料庫 URL 。若設為偽，即不存取資料庫。
  * @var {string} dburl
  * @var {string} collName
@@ -17,14 +22,23 @@ var collName = 'records';
 var outputJSON = false;
 
 /**
- * 全域變數們。
- * @var {Collection} coll MongoDB Collection.
+ * 載入所需套件。
  */
 var util = require('util');
 var fs = require('fs');
 var xml2js = require('xml2js');
-var coll;
 
+/**
+ * 其他全域變數。
+ * @var {Collection} coll MongoDB Collection
+ * @var {array} arrayFields 指定哪些欄位是 comma-separated ，將拆成陣列。
+ */
+var coll;
+var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'Keyword', 'Eng_Keyword', 'Category', 'Cake', 'Service'];
+
+//
+// Start
+//
 if(dburl) require('mongodb').MongoClient.connect(dburl, function(err, db) {
 	if(err) return console.error('Error: cannot connect database');
 	coll = db.collection(collName);
@@ -85,12 +99,15 @@ function parseByDate(dates, index, callback) {
 				try {
 					var records = res.Gazette.Record;
 					records.forEach(function(rec) {
-						//delete rec.HTMLContent;
+						if(deleteHTMLContent) delete rec.HTMLContent;
 						for(var i in rec) {
 							if(!Array.isArray(rec[i]) || rec[i].length != 1)
 								return console.error('Error: uknown format of some record');
 							var val = rec[i][0];
-							if(val) rec[i] = val;
+							if(val) {
+								if(arrayFields.indexOf(i) == -1) rec[i] = val;
+								else rec[i] = val.split(';');
+							}
 							else delete rec[i];
 						}
 						rec.gazetteDate = dateCEStr;

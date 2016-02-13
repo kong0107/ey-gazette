@@ -29,5 +29,6 @@
 * 如需下載全部，則執行 `./main.sh` ，可能需時十幾個小時，解壓縮後的資料達 20 GB 以上。
 
 ### 將下載來的 XML 轉換為 JSON 或匯入 MongoDB
-* 編輯 `import2mongo.js` ，設定 `dburl` 與 `outputJSON` 。
+部分欄位會被拆解為陣列。
+* 編輯 `import2mongo.js` ，設定 `dburl` 、 `outputJSON` 與 `deleteHTMLContent` 。
 * 執行 `npm install && node import2mongo` 。
