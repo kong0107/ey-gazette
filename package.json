@@ -1,6 +1,6 @@
 {
   "name": "ey-gazette",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Site for Executive Yuan Gazette",
   "keywords": [
     "gov"
@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/kong0107/ey-gazette#readme",
   "dependencies": {
+    "async": "^1.5.2",
     "debug": "^2.2.0",
     "express": "^4.13.4",
     "jade": "^1.11.0",

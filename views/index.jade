@@ -1,9 +1,11 @@
 extends layout
 
 block content
-	h1 首頁
-	p: em 還不知道首頁要放甚麼
-	form(action='/search')
-		input(type='text', name='q', placeholder='蒐尋')
-		input(type='submit', value='查詢')
-	.rawdata= JSON.stringify(data, null, '\t')
+	section
+		header: h1 分類瀏覽
+		each field in distinctFields
+			article
+				header: h2: a(name=field)= fields[field].title
+				ul
+					each term in fields[field].options
+						li= term
