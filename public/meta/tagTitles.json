@@ -1,0 +1,23 @@
+{
+"MetaId": "公報系統流水號",
+"Doc_Style_LName": "公報類型",
+"Doc_Style_SName": "公報小類型",
+"Chapter": "公報篇別",
+"PubGov": "公報小篇",
+"PubGovName": "公(發)布機關",
+"UndertakeGov": "承辦機關",
+"Officer_name": "機關首長",
+"Date_Created": "發文日期",
+"GazetteId": "發文字號",
+"Title": "標題",
+"TitleEnglish": "英文標題",
+"ThemeSubject": "主旨",
+"Keyword": "關鍵字",
+"Eng_Keyword": "英文關鍵字",
+"Explain": "說明",
+"Category": "內容主題",
+"Cake": "施政分類",
+"Service": "服務分類",
+"GazetteHTML": "公報網址",
+"HTMLContent": "網頁內容"
+}

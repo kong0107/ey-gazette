@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	h1 首頁
+	p: em 還不知道首頁要放甚麼
+	form(action='/search')
+		input(type='text', name='q', placeholder='蒐尋')
+		input(type='submit', value='查詢')
+	.rawdata= JSON.stringify(data, null, '\t')
