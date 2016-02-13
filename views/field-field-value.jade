@@ -1,0 +1,11 @@
+extends layout
+
+block content
+	header: h1 #{fields[field].title}：#{fieldValue}
+	each doc in docs
+		article.articleListItem
+			a(href=doc.GazetteHTML)
+				span.PubGovName= doc.PubGovName.join(';')
+				span.GazetteId= doc.GazetteId
+			h2: a(href='/article/'+doc.MetaId)= doc.Title
+			time= doc.Date_Created

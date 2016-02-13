@@ -17,6 +17,8 @@ app.set('view engine', 'jade');
 app.use(express.static(__dirname + '/public'));
 
 app.use('/', require('./routes/index.js'));
+app.use('/field', require('./routes/field.js'));
+app.use('/article', require('./routes/article.js'));
 app.use('/api', require('./routes/api.js'));
 
 app.use(function(req, res) {
@@ -30,7 +32,6 @@ app.use(function(req, res) {
  * Settings.
  */
 app.locals.siteName = app.locals.pageTitle = config.siteName;
-app.locals.distinctFields = config.distinctFields;
 async.parallel([
 	function(callback) {
 		mongodb.MongoClient.connect(config.dburl, callback);

@@ -1,0 +1,10 @@
+extends layout
+
+block content
+	header: h1= doc.Title
+	.dlTable
+		each value, field in doc
+			if fields[field]
+				dl
+					dt= fields[field].title
+					dd.rawdata= value.join ? value.join(';') : value

@@ -1,0 +1,10 @@
+extends layout
+
+block content
+	header: h1 分類瀏覽
+	each field in distinctFields
+		article.category
+			header: h2: a(href='/field/'+field)= fields[field].title
+			ul
+				each term in fields[field].options
+					li: a(href='/field/'+field+'/'+term)= term
