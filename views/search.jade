@@ -1,13 +1,14 @@
 extends layout
 
 block content
-	header: h1 #{fields[field].title}：#{fieldValue}
+	header: h1= pageTitle
 	em 共 #{count} 筆
 	if count > ipp
 		form.pagination
 			if page > 1
-				.prevPage: a(href='/field/'+field+'/'+fieldValue+'?page='+(page-1)) 上一頁
+				.prevPage: a(href='/search?q='+search+'&page='+(page-1)) 上一頁
 			.pageSelector
+				input(type='hidden', name='q', value=search)
 				| 第
 				select(name='page', onchange='this.form.submit()')
 					- var p = 0
@@ -16,7 +17,7 @@ block content
 						option(selected=(p==page))= p
 				| 頁
 			if page < count / ipp
-				.nextPage: a(href='/field/'+field+'/'+fieldValue+'?page='+(page+1)) 下一頁
+				.nextPage: a(href='/search?q='+search+'&page='+(page+1)) 下一頁
 	each doc in docs
 		article.articleListItem
 			a(href=doc.GazetteHTML)

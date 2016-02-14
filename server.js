@@ -17,6 +17,7 @@ app.set('view engine', 'jade');
 app.use(express.static(__dirname + '/public'));
 
 app.use('/', require('./routes/index.js'));
+app.use('/search', require('./routes/search.js'));
 app.use('/field', require('./routes/field.js'));
 app.use('/article', require('./routes/article.js'));
 app.use('/api', require('./routes/api.js'));

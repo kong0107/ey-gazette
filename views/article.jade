@@ -61,16 +61,20 @@ block content
 				dd: ul
 					each name in doc.Officer_name
 						li= name
-		if doc.ThemeSubject
-			dl
-				dt 主旨
-				dd= doc.ThemeSubject
-		if doc.Explain
-			dl
-				dt 說明
-				dd.Explain
-					each para in doc.Explain.split("\r\n")
-						p= para
+	if doc.ThemeSubject
+		section
+			h2 主旨
+			p= doc.ThemeSubject
+	if doc.Explain
+		section
+			h2 說明
+			.Explain
+				each para in doc.Explain.split(/\r?\n/)
+					p= para
+	section
+		h2 公報原始網頁
+		iframe.GazetteHTML(src=doc.GazetteHTML)
+	.dlTable
 		if doc.Keyword
 			dl
 				dt 關鍵字

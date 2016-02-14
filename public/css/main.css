@@ -127,6 +127,12 @@ dt {white-space: pre;}
 	text-indent: -2em;
 }
 
+iframe.GazetteHTML {
+	width: 1000px;
+	height: 600px;
+	display: block;
+}
+
 
 /**
  * Footer

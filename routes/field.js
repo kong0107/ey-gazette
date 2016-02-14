@@ -11,7 +11,7 @@ router.get('/', function(req, res) {
 	});
 });
 
-router.get('/:field/:value?/:page?',
+router.get('/:field/:value?',
 	function(req, res, next) {
 		var fields = req.app.locals.fields;
 		var field = res.locals.field = req.params.field;
@@ -24,20 +24,20 @@ router.get('/:field/:value?/:page?',
 	},
 	function(req, res) {
 		var fieldValue = res.locals.fieldValue = req.params.value;
-		var coll = req.app.locals.db.collection('records');
-		var page = res.locals.page = parseInt(req.params.page, 10) || 1;
+		var page = res.locals.page = parseInt(req.query.page, 10) || 1;
 		var skip = (page - 1) * config.ipp;
 		var query = {};
 		query[req.params.field] = fieldValue;
 
 		debug('Page: ' + page);
 
+		var cursor = req.app.locals.db.collection('records').find(query);
 		async.parallel({
-			docs: function(callback) {
-				coll.find(query).sort({gazetteDate: -1}).skip(skip).limit(config.ipp).toArray(callback);
-			},
 			count: function(callback) {
-				coll.count(query, callback);
+				cursor.count(callback);
+			},
+			docs: function(callback) {
+				cursor.sort({gazetteDate: -1}).skip(skip).limit(config.ipp).toArray(callback);
 			}
 		}, function(err, results) {
 			res.render('field-field-value', results);
