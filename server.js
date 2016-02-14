@@ -16,6 +16,13 @@ app.set('view engine', 'jade');
  */
 app.use(express.static(__dirname + '/public'));
 
+app.use(function(req, res, next) {
+	if(app.locals.ready) return next();
+	debug('Warn: requested before ready');
+	res.set('Retry-After', 30);
+	res.status(503).json({error: 'Service Unavailable'});
+});
+
 app.use('/', require('./routes/index.js'));
 app.use('/search', require('./routes/search.js'));
 app.use('/field', require('./routes/field.js'));
@@ -30,25 +37,28 @@ app.use(function(req, res) {
 });
 
 /**
- * Settings.
+ * Load global data.
  */
 app.locals.siteName = app.locals.pageTitle = config.siteName;
 app.locals.ipp = config.ipp;
-async.parallel([
-	function(callback) {
-		mongodb.MongoClient.connect(config.dburl, callback);
+async.parallel({
+	database: function(callback) {
+		mongodb.MongoClient.connect(config.dburl + config.dbname, callback);
 	},
-	function(callback) {
+	fieldTitles: function(callback) {
 		fs.readFile('./public/meta/fieldTitles.json', 'utf8', callback);
 	}
-], function(err, res) {
-	if(err) throw err;
+}, function(err, res) {
+	if(err) {
+		debug(err);
+		throw err;
+	}
 	debug('Connected to database');
-	app.locals.db = res[0];
-	var coll = res[0].collection('records');
+	app.locals.db = res.database;
+	var coll = res.database.collection('records');
 	var fields = {};
 	async.forEachOfSeries(
-		JSON.parse(res[1]),
+		JSON.parse(res.fieldTitles),
 		function(title, field, callback) {
 			var info = {title: title};
 			fields[field] = info;
@@ -64,6 +74,8 @@ async.parallel([
 			if(err) throw err;
 			debug('Loaded categories');
 			app.locals.fields = fields;
+			debug('Server Ready!');
+			app.locals.ready = true;
 		}
 	);
 });
