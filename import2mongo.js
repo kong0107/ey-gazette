@@ -31,9 +31,11 @@ var xml2js = require('xml2js');
 /**
  * 其他全域變數。
  * @var {Collection} coll MongoDB Collection
+ * @var {string} dataDir 存放 XML 檔的路徑，也是輸出 JSON 時的存放路徑。
  * @var {array} arrayFields 指定哪些欄位是 comma-separated ，將拆成陣列。
  */
 var coll;
+var dataDir = './data/';
 var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'Keyword', 'Eng_Keyword', 'Category', 'Cake', 'Service'];
 
 //
@@ -42,7 +44,7 @@ var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'K
 if(dburl) require('mongodb').MongoClient.connect(dburl, function(err, db) {
 	if(err) return console.error('Error: cannot connect database');
 	coll = db.collection(collName);
-	coll.drop(function() {main(db);});
+	main(db);
 });
 else main();
 
@@ -50,12 +52,19 @@ else main();
 // Functions
 //
 function main(db) {
-	fs.readdir('./data', function(err, dirs) {
+	var callback = function(msg, err){
+		if(db) db.close();
+		console[err ? 'error' : 'log'](msg || 'Finish');
+	};
+	if(process.argv.length > 2) {
+		var split = process.argv[2].split('-');
+		if(split.length != 3 || split.some(isNaN))
+			return callback('Error: argument must be a date string', true);
+		return parseXMLFile(split, callback);
+	}
+	fs.readdir(dataDir, function(err, dirs) {
 		if(err) return console.error('Error: no `data` directory to import');
-		parseByYear(dirs, 0, function() {
-			if(db) db.close();
-			console.log('Finish');
-		});
+		parseByYear(dirs, 0, callback);
 	});
 }
 
@@ -66,7 +75,7 @@ function parseByYear(years, index, callback) {
 		setImmediate(parseByYear, years, index + 1, callback);
 	};
 	var year = years[index];
-	var dir = './data/' + year;
+	var dir = dataDir + year;
 	fs.readdir(dir, function(err, dirs) {
 		if(err) return next('Warning: failed to read dir ' + dir, err);
 		if(isNaN(parseInt(year, 10)))
@@ -86,44 +95,46 @@ function parseByDate(dates, index, callback) {
 	var split = dateStr.split('-').map(function(num) {return parseInt(num, 10);});
 	if(split.length != 3 || split.some(isNaN))
 		return next('Warning: skipping unknown dir ' + dateStr, true);
-	split[0] += 1911;
-	var dateCEStr = (new Date(split.join('-'))).toISOString().substr(0, 10);
+	parseXMLFile(split, next);
+}
 
-	fs.readFile(
-		util.format('./data/%s/%s/%s.xml', yearStr, dateStr, dateStr),
-		'utf8',
-		function(err, xml) {
-			if(err) return next('Error: error on file reading', err);
-			xml2js.parseString(xml, function(err, res) {
-				if(err) return next('Error: XML parsing error of ' + dateStr, err);
-				try {
-					var records = res.Gazette.Record;
-					records.forEach(function(rec) {
-						if(deleteHTMLContent) delete rec.HTMLContent;
-						for(var i in rec) {
-							if(!Array.isArray(rec[i]) || rec[i].length != 1)
-								return console.error('Error: uknown format of some record');
-							var val = rec[i][0];
-							if(val) {
-								if(arrayFields.indexOf(i) == -1) rec[i] = val;
-								else rec[i] = val.split(';');
-							}
-							else delete rec[i];
+function parseXMLFile(dateArr, next) {
+	var dateStr = dateArr.join('-');
+	var filename = dataDir + dateArr[0] + '/' + dateStr + '/' + dateStr + '.xml';
+	dateArr[0] = parseInt(dateArr[0], 10) + 1911;
+	var dateCEStr = (new Date(dateArr.join('-'))).toISOString().substr(0, 10);
+	fs.readFile(filename, 'utf8', function(err, xml) {
+		if(err) return next('Error: error on reading ' + filename, err);
+		xml2js.parseString(xml, function(err, res) {
+			if(err) return next('Error: XML parsing error in ' + filename, err);
+			var records;
+			try {
+				records = res.Gazette.Record;
+				records.forEach(function(rec) {
+					if(deleteHTMLContent) delete rec.HTMLContent;
+					for(var i in rec) {
+						if(!Array.isArray(rec[i]) || rec[i].length != 1)
+							return console.error('Error: uknown format of some record on ' + dateStr);
+						var val = rec[i][0];
+						if(val) {
+							if(arrayFields.indexOf(i) == -1) rec[i] = val;
+							else rec[i] = val.split(';');
 						}
-						rec.gazetteDate = dateCEStr;
-					});
-				}
-				catch(err) {return next('Error: xmlDoc with wrong structure ' + dateStr, err);}
-
-				if(outputJSON) fs.writeFileSync(
-					util.format('./data/%s/%s/%s.json', yearStr, dateStr, dateStr),
-					JSON.stringify(records, null, '\t').replace(/\n\t+/g, '\n')
-				);
-				if(coll) coll.insertMany(records, function(err) {
-					next('Finished importing gazette with date ' + dateStr, err);
+						else delete rec[i];
+					}
+					rec.gazetteDate = dateCEStr;
 				});
-				else next(dateStr);
+			}
+			catch(err) {return next('Error: xmlDoc with wrong structure in' + filename, err);}
+
+			if(outputJSON) fs.writeFileSync(
+				filename.slice(0, -3) + 'json',
+				JSON.stringify(records, null, '\t').replace(/\n\t+/g, '\n')
+			);
+			if(coll) coll.insertMany(records, function(err) {
+				next('Imported gazette on ' + dateStr, err);
 			});
-		}
-	);
+			else next(dateStr);
+		});
+	});
 }
