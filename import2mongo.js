@@ -1,5 +1,7 @@
 /**
  * @file 把已下載的 XML 轉換成 JS 物件、匯入 MongoDB 。
+ *
+ * Usage: node import2mongo.js [<date> [<xmlFile>]]
  */
 
 /**
@@ -39,7 +41,7 @@ var dataDir = './data/';
 var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'Keyword', 'Eng_Keyword', 'Category', 'Cake', 'Service'];
 
 //
-// Start
+// Start: 先跟資料庫連線再處理事情。
 //
 if(dburl) require('mongodb').MongoClient.connect(dburl, function(err, db) {
 	if(err) return console.error('Error: cannot connect database');
@@ -48,9 +50,9 @@ if(dburl) require('mongodb').MongoClient.connect(dburl, function(err, db) {
 });
 else main();
 
-//
-// Functions
-//
+/**
+ * 主函式，依引數數量判斷使用者需求。
+ */
 function main(db) {
 	var callback = function(msg, err){
 		if(db) db.close();
@@ -60,7 +62,8 @@ function main(db) {
 		var split = process.argv[2].split('-');
 		if(split.length != 3 || split.some(isNaN))
 			return callback('Error: argument must be a date string', true);
-		return parseXMLFile(split, callback);
+		if(process.argv.length > 3) return parseXMLFile(process.argv[3], split, callback);
+		else return parseXMLFile(split, callback);
 	}
 	fs.readdir(dataDir, function(err, dirs) {
 		if(err) return console.error('Error: no `data` directory to import');
@@ -98,11 +101,25 @@ function parseByDate(dates, index, callback) {
 	parseXMLFile(split, next);
 }
 
-function parseXMLFile(dateArr, next) {
+/**
+ * Parse an XML file into JS object.
+ *
+ * @param {?string} filename XML 檔案的路徑。如省略，即從 dateArr 拼湊。
+ * @param {!array} dateArr 日期陣列。第一元素為民國年；各元素為字串（即不再補零）。
+ * @param {!function} next Callback function
+ */
+function parseXMLFile(filename, dateArr, next) {
+	if(arguments.length == 2) {
+		next = arguments[1];
+		dateArr = arguments[0];
+	}
 	var dateStr = dateArr.join('-');
-	var filename = dataDir + dateArr[0] + '/' + dateStr + '/' + dateStr + '.xml';
+	if(arguments.length == 2)
+		filename = dataDir + dateArr[0] + '/' + dateStr + '/' + dateStr + '.xml';
+
 	dateArr[0] = parseInt(dateArr[0], 10) + 1911;
 	var dateCEStr = (new Date(dateArr.join('-'))).toISOString().substr(0, 10);
+
 	fs.readFile(filename, 'utf8', function(err, xml) {
 		if(err) return next('Error: error on reading ' + filename, err);
 		xml2js.parseString(xml, function(err, res) {
