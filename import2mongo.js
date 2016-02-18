@@ -10,11 +10,14 @@
 var deleteHTMLContent = true;
 
 /**
- * MongoDB 資料庫 URL 。若設為偽，即不存取資料庫。
+ * MongoDB 資料庫設定。若 dburl 設為偽，即不存取資料庫。
  * @var {string} dburl
+ * @var {string} dbname
  * @var {string} collName
  */
-var dburl = 'mongodb://localhost:27017/ey-gazette';
+
+var dburl = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost:27017/';
+var dbname = process.env.OPENSHIFT_APP_NAME || 'ey-gazette';
 var collName = 'records';
 
 /**
@@ -24,26 +27,26 @@ var collName = 'records';
 var outputJSON = false;
 
 /**
+ * 其他全域變數。
+ * @var {string} dataDir 存放 XML 檔的路徑，也是輸出 JSON 時的存放路徑。
+ * @var {Collection} coll MongoDB Collection
+ * @var {array} arrayFields 指定哪些欄位是 comma-separated ，將拆成陣列。
+ */
+var dataDir = './data/';
+var coll;
+var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'Keyword', 'Eng_Keyword', 'Category', 'Cake', 'Service'];
+
+/**
  * 載入所需套件。
  */
 var util = require('util');
 var fs = require('fs');
 var xml2js = require('xml2js');
 
-/**
- * 其他全域變數。
- * @var {Collection} coll MongoDB Collection
- * @var {string} dataDir 存放 XML 檔的路徑，也是輸出 JSON 時的存放路徑。
- * @var {array} arrayFields 指定哪些欄位是 comma-separated ，將拆成陣列。
- */
-var coll;
-var dataDir = './data/';
-var arrayFields = ['PubGovName', 'UndertakeGov', 'Officer_name', 'GazetteId', 'Keyword', 'Eng_Keyword', 'Category', 'Cake', 'Service'];
-
 //
 // Start: 先跟資料庫連線再處理事情。
 //
-if(dburl) require('mongodb').MongoClient.connect(dburl, function(err, db) {
+if(dburl) require('mongodb').MongoClient.connect(dburl + dbname, function(err, db) {
 	if(err) return console.error('Error: cannot connect database');
 	coll = db.collection(collName);
 	main(db);
