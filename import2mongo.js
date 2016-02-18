@@ -66,7 +66,7 @@ function main(db) {
 		else return parseXMLFile(split, callback);
 	}
 	fs.readdir(dataDir, function(err, dirs) {
-		if(err) return console.error('Error: no `data` directory to import');
+		if(err) return callback('Error: cannot read directory ' + dataDir, true);
 		parseByYear(dirs, 0, callback);
 	});
 }

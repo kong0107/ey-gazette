@@ -30,5 +30,8 @@
 
 ### 將下載來的 XML 轉換為 JSON 或匯入 MongoDB
 部分欄位會被拆解為陣列。
-* 編輯 `import2mongo.js` ，設定 `dburl` 、 `outputJSON` 與 `deleteHTMLContent` 。
-* 執行 `npm install && node import2mongo` 。
+* 執行 `npm install`
+* 編輯 `import2mongo.js` ，設定右列變數： `dburl`, `outputJSON`, `deleteHTMLContent`, `dataDir` 。
+* 執行 `node import2mongo.js [<date> [<xmlFile>]]` ，其中引數：
+  * `<date>` 格式為 `%03d-%02d-%02d` 之日期，如忽略即轉換所有位於 `dataDir` 的公報。
+  * `<xmlFile>` 為 XML 檔路徑，僅於設定 `<date>` 時為可選。如忽略即會抓取 `$dataDir/$year/$date/$date.xml` 。
