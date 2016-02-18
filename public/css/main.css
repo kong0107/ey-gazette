@@ -117,7 +117,7 @@ dt {white-space: pre;}
 }
 .pageSelector {
 	float: left;
-	margin-left: calc(50% - 4em);
+	margin-left: calc(50% - 6em);
 }
 .nextPage {
 	float: right;
