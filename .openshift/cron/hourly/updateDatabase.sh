@@ -11,7 +11,8 @@ today=$year-$(TZ=Asia/Taipei date '+%m-%d')
 xmlFile=${OPENSHIFT_TMP_DIR}$today.xml
 wget http://kong0107.github.io/ey-gazette-data/$year/$today/$today.xml -O $xmlFile
 
-scriptFile=${OPENSHIFT_DATA_DIR}import2mongo.js
-wget https://github.com/kong0107/ey-gazette/raw/master/import2mongo.js -O $scriptFile
+cd $OPENSHIFT_DATA_DIR
+wget https://github.com/kong0107/ey-gazette/raw/master/import2mongo.js
+node import2mongo.js $today $xmlFile
 
-node $scriptFile $today $xmlFile
+rm $xmlFile
