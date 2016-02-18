@@ -6,7 +6,7 @@ block content
 	if count > ipp
 		form.pagination
 			if page > 1
-				.prevPage: a(href='/field/'+field+'/'+fieldValue+'?page='+(page-1)) 上一頁
+				a.prevPage(href='/field/'+field+'/'+fieldValue+'?page='+(page-1)) 上一頁
 			.pageSelector
 				| 第
 				select(name='page', onchange='this.form.submit()')
@@ -16,7 +16,7 @@ block content
 						option(selected=(p==page))= p
 				| 頁
 			if page < count / ipp
-				.nextPage: a(href='/field/'+field+'/'+fieldValue+'?page='+(page+1)) 下一頁
+				a.nextPage(href='/field/'+field+'/'+fieldValue+'?page='+(page+1)) 下一頁
 	each doc in docs
 		article.articleListItem
 			a(href=doc.GazetteHTML)

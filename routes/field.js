@@ -29,8 +29,6 @@ router.get('/:field/:value?',
 		var query = {};
 		query[req.params.field] = fieldValue;
 
-		debug('Page: ' + page);
-
 		var cursor = req.app.locals.db.collection('records').find(query);
 		async.parallel({
 			count: function(callback) {

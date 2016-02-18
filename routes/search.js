@@ -11,10 +11,10 @@ router.get('/:q?', function(req, res, next) {
 	if(!q) return res.redirect('/');
 	res.locals.search = q;
 	res.locals.pageTitle = '搜尋「' + q + '」的結果';
-	
+
 	var page = res.locals.page = parseInt(req.query.page, 10) || 1;
 	var skip = (page - 1) * config.ipp;
-	
+
 	var re = new RegExp(q);
 	var cursor = req.app.locals.db.collection('records').find({$or:[
 		{'Doc_Style_LName': re},
@@ -36,7 +36,7 @@ router.get('/:q?', function(req, res, next) {
 		{'Service': re},
 		{'HTMLContent': re}
 	]});
-	
+
 	async.parallel({
 		count: function(callback) {
 			cursor.count(callback);

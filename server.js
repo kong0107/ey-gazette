@@ -41,7 +41,64 @@ app.use(function(req, res) {
  */
 app.locals.siteName = app.locals.pageTitle = config.siteName;
 app.locals.ipp = config.ipp;
-async.parallel({
+
+async.waterfall([
+	function(callback) {
+		async.parallel({
+			database: function(callback) {
+				mongodb.MongoClient.connect(config.dburl + config.dbname, callback);
+			},
+			fieldTitles: function(callback) {
+				fs.readFile('./public/meta/fieldTitles.json', 'utf8', callback);
+			}
+		}, callback);
+	},
+	function(results, callback) {
+		debug('Connected to database');
+		app.locals.db = results.database;
+		var coll = app.locals.coll = results.database.collection('records');
+		var fields = {};
+		async.forEachOfSeries(
+			JSON.parse(results.fieldTitles),
+			function(title, field, callback) {
+				var info = {title: title};
+				fields[field] = info;
+				if(config.distinctFields.indexOf(field) == -1)
+					return setImmediate(callback);
+				coll.distinct(field, function(err, docs) {
+					if(err) return callback(err);
+					info.options = docs;
+					setImmediate(callback);
+				});
+			},
+			function(err) {
+				if(err) return callback(err);
+				debug('Loaded categories');
+				app.locals.fields = fields;
+				callback()
+			}
+		);
+	},
+	function(callback) {
+		app.locals.coll.findOne({}, {sort: {'gazetteDate': -1}}, function(err, doc) {
+			if(err) return callback(err);
+			app.locals.lastUpdate = doc.gazetteDate;
+			debug('Last Update: ' + doc.gazetteDate);
+			callback();
+		});
+	}
+], function(err) {
+	if(err) {
+		debug(err);
+		throw err;
+	}
+	app.locals.ready = true;
+	debug('Server Ready!');
+});
+
+
+
+/*async.parallel({
 	database: function(callback) {
 		mongodb.MongoClient.connect(config.dburl + config.dbname, callback);
 	},
@@ -55,7 +112,7 @@ async.parallel({
 	}
 	debug('Connected to database');
 	app.locals.db = res.database;
-	var coll = res.database.collection('records');
+	var coll = app.locals.coll = res.database.collection('records');
 	var fields = {};
 	async.forEachOfSeries(
 		JSON.parse(res.fieldTitles),
@@ -78,4 +135,4 @@ async.parallel({
 			app.locals.ready = true;
 		}
 	);
-});
+});*/

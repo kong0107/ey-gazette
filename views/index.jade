@@ -1,0 +1,17 @@
+extends layout
+
+block content
+	header: h1= date
+	em 共 #{docs.length} 筆
+	form.pagination
+		a.prevPage(href='/?date='+prevDate) 前一天
+		.pageSelector
+			input(type='date', name='date', value=date)
+		a.nextPage(href='/?date='+nextDate) 後一天
+	each doc in docs
+		article.articleListItem
+			a(href=doc.GazetteHTML)
+				span.PubGovName= doc.PubGovName.join(';')
+				span.GazetteId= doc.GazetteId
+			h2: a(href='/article/'+doc.MetaId)= doc.Title
+			time= doc.Date_Created
