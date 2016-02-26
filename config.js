@@ -6,7 +6,7 @@ var config = {
 	dburl		: process.env.OPENSHIFT_MONGODB_DB_URL	|| 'mongodb://localhost:27017/',
 	dbname		: process.env.OPENSHIFT_APP_NAME		|| 'ey-gazette',
 
-	siteName	: '行政院公報查詢',
+	siteName	: '行政院公報備份',
 	ipp			: 10,
 	distinctFields: [
 		'Doc_Style_LName',

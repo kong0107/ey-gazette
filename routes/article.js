@@ -7,6 +7,7 @@ router.get('/:articleId', function(req, res, next) {
 	req.app.locals.db.collection('records')
 	.findOne({MetaId: req.params.articleId}, function(err, doc) {
 		if(err || !doc) return next(err);
+		res.locals.pageTitle = doc.Title;
 		res.render('article', {doc: doc});
 	});
 });

@@ -7,6 +7,7 @@ var router = module.exports = express.Router();
 
 router.get('/', function(req, res) {
 	res.render('field', {
+		pageTitle: '依類型瀏覽',
 		distinctFields: config.distinctFields
 	});
 });
@@ -17,8 +18,8 @@ router.get('/:field/:value?',
 		var field = res.locals.field = req.params.field;
 		if(config.distinctFields.indexOf(field) == -1) return next('route');
 		if(req.params.value) return next();
-		res.locals.pageTitle = fields[field].title;
 		res.render('field-field', {
+			pageTitle: '所有' + fields[field].title,
 			fieldOptions: fields[field].options
 		});
 	},
@@ -38,6 +39,7 @@ router.get('/:field/:value?',
 				cursor.sort({gazetteDate: -1}).skip(skip).limit(config.ipp).toArray(callback);
 			}
 		}, function(err, results) {
+			res.locals.pageTitle = fieldValue;
 			res.render('field-field-value', results);
 		});
 	}
