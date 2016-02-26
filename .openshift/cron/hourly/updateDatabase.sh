@@ -17,3 +17,6 @@ wget https://github.com/kong0107/ey-gazette/raw/master/import2mongo.js
 node import2mongo.js $today $xmlFile
 
 rm $xmlFile
+
+gear stop
+gear start
