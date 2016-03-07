@@ -1,7 +1,7 @@
 #!/bin/bash
 hour=$(TZ=Asia/Taipei date '+%H')
 weekday=$(TZ=Asia/Taipei date '+%w')
-if [ $hour != 17 || $weekday = 0 || $weekday = 6 ]; then
+if [[ $hour != 17 || $weekday = 0 || $weekday = 6 ]]; then
     exit
 fi
 
