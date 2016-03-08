@@ -44,8 +44,8 @@ if [[ -n "$1" && $1 -ne "all" ]]; then
 fi
 
 nowYear=$[`date +%Y`-1911]
-nowMonth=`date +%m`
-nowDate=`date +%d`
+nowMonth=`date +%m | sed -e 's/^0*//g'`
+nowDate=`date +%d | sed -e 's/^0*//g'`
 
 if [ -z $1 ]; then
 	str=`printf "%03d-%02d-%02d" $nowYear $nowMonth $nowDate`
