@@ -1,6 +1,6 @@
 {
   "name": "ey-gazette",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Backup of Executive Yuan Gazette",
   "dependencies": {
     "async": "^1.5.2",
